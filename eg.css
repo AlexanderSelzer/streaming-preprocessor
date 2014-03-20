@@ -1,11 +1,13 @@
 ::root {
   var-hello: red;
   var-this-that: #000;
+  var-and-that: rgb(0, 3, 7);
 }
 
 li a,
 .hello li a {
   padding-left: 20px;
+  background: var(and-that);
 }
 
 .header {
