@@ -1,0 +1,17 @@
+{
+  "name": "streaming-preprocessor",
+  "version": "0.0.1",
+  "description": "An experiment at parsing and manipulating CSS using Highland streams.",
+  "main": "index.js",
+  "dependencies": {
+    "highland": "~1.19.1",
+    "through2": "~0.4.1",
+    "concat-stream": "~1.4.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Alexander Selzer <aselzer3@gmail.com> (http://alexselzer.com/)",
+  "license": "MIT"
+}
