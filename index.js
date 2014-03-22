@@ -6,6 +6,10 @@ var argv = require("optimist")
 .boolean("v")
 .argv;
 
+var compactify = require("./lib/compactify");
+var variable = require("./lib/variable");
+var comment = require("./lib/comment");
+
 var input = fs.readFileSync(argv._[0]).toString();
 
 var options = {
@@ -22,73 +26,18 @@ var lines = input.split("\n");
 
 _(lines)
 .map(function(line) {
-  var comment = /\/\//;
-
-  if (!comment.test(line)) {
-    return line;
-  }
-  else {
-    var commentPos = line.search(comment);
-    var result = line.slice(0, commentPos);
-
-    if (/\w/.test(result))
-      return result;
-    else
-      return null;
-  }
-})
-.filter(function(line) {
-  if (line !== null)
-    return true;
+  return comment.single(css, line);
 })
 .map(function(line) {
-  // Variable Declarations
-  var varDec = /var-([\w-]+):\s+?([\w\s\(\)#,\.]+);/;
-
-  if (varDec.test(line)) {
-    var varSearch = varDec.exec(line);
-    var key = varSearch[1];
-    var value = varSearch[2];
-    css.variables[key] = value;
-  }
-  else {
-    return line;
-  }
+  return variable.declaration(css, line);
 })
 .map(function(line) {
-  // Variable Usage
-  var variable = /var\(([\w-]+)\)/
-
-  if (variable.test(line)) {
-    var key = variable.exec(line)[1];
-    var value = css.variables[key];
-    var varPos = line.search(variable);
-    return line.slice(0, varPos) + value + line.slice(varPos + 5 + key.length, line.length);
-  }
-  else {
-    return line;
-  }
+  return variable.usage(css, line);
 })
 .collect()
 .toArray(function(array) {
   if (argv.compact) {
-  
-  	var output = 
-    array[0]
-    .join(" ")
-    // Compactify separators.
-    .replace(/;\s+/g, ";")
-    .replace(/:\s+/g, ":")
-    .replace(/,\s+/g, ",")
-    // Remove spaces before/after braces.
-    .replace(/\{\s+/g, "{")
-    .replace(/\s+\}/g, "}")
-    .replace(/\s+\{/g, "{")
-    .replace(/\}\s+/g, "}")
-    // Remove redundant spaces.
-    .replace(/\s+/g, " ")
-    // Remove empty selectors.
-    .replace(/[-:\w]+\{\}/g, "");
+  	var output = compactify(array[0].join(" "));
     
     if (options.verbose) {
       console.log("Input size:", chalk.green(css.bytes))
