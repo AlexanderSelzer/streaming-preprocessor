@@ -1,18 +1,24 @@
 var fs = require("fs");
+var chalk = require("chalk");
 var _ = require("highland");
-var argv = require("optimist").argv;
+var argv = require("optimist")
+.boolean("compact")
+.boolean("v")
+.argv;
+
+var input = fs.readFileSync(argv._[0]).toString();
 
 var options = {
-  compact: argv.compact
+  compact: argv.compact,
+  verbose: argv.v
 }
 
 var css = {
+  bytes: Buffer.byteLength(input),
   variables: {}
 }
 
-var cssFile = fs.readFileSync(process.argv[2]);
-
-var lines = cssFile.toString().split("\n");
+var lines = input.split("\n");
 
 _(lines)
 .map(function(line) {
@@ -65,11 +71,34 @@ _(lines)
 })
 .collect()
 .toArray(function(array) {
-  if (argv.compact)
-    console.log(
+  if (argv.compact) {
+  
+  	var output = 
     array[0]
-    .join("")
-    .replace(/\s/, ""));
-  else
+    .join(" ")
+    // Compactify separators.
+    .replace(/;\s+/g, ";")
+    .replace(/:\s+/g, ":")
+    .replace(/,\s+/g, ",")
+    // Remove spaces before/after braces.
+    .replace(/\{\s+/g, "{")
+    .replace(/\s+\}/g, "}")
+    .replace(/\s+\{/g, "{")
+    .replace(/\}\s+/g, "}")
+    // Remove redundant spaces.
+    .replace(/\s+/g, " ")
+    // Remove empty selectors.
+    .replace(/[-:\w]+\{\}/g, "");
+    
+    if (options.verbose) {
+      console.log("Input size:", chalk.green(css.bytes))
+      console.log("Output size:", chalk.magenta(Buffer.byteLength(output)))
+      console.log("\n");
+    }
+    
+    console.log(output);
+  }
+  else {
     console.log(array[0].join("\n"));
+  }
 });
