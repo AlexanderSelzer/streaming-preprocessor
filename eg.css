@@ -6,7 +6,7 @@
 
 li a,
 .hello li a {
-  padding-left: 20px;
+  padding-left: 20px; /* */
   background: var(and-that);
 }
 
@@ -18,13 +18,33 @@ li a,
 }
 
 .body {
-  height: 800px;
+  height: /* 800px*/ 720px;
   border: 1px solid;
-  color: var(hello);
-  border-color: #ccc;
-  border-color: rgba(255, 255, 255, 0.5);
+  color: /* var(hello)*/ var(this-that);
+  border-color: var(hello);
+  border-color: /*rgba(255, 255, 255, 0.5)*/ #382948;
   background: #eee;
   background: rgba(255, 255, 255, 0.7);
   margin: 4px 0;
   padding: 3px 8px;
+}
+
+/*
+li {
+  box-shadow: 0 0 4 6 #939283;
+  padding-left: 34px;
+  margin-top: 12px;
+}
+*/
+
+li {
+  box-shadow: 3 2 6 8 #392132;
+  padding-left: 16px;
+  
+  margin-top: 10px; /* 12px;
+  color: rgb(0, 28, 12);
+  */
+  
+  /* min-width:  20px;
+  max-width: 32px; */ min-height: 32px;
 }

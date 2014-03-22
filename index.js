@@ -3,7 +3,9 @@ var chalk = require("chalk");
 var _ = require("highland");
 var argv = require("optimist")
 .boolean("compact")
+.boolean("removecomments")
 .boolean("v")
+.boolean("compare")
 .argv;
 
 var compactify = require("./lib/compactify");
@@ -14,19 +16,36 @@ var input = fs.readFileSync(argv._[0]).toString();
 
 var options = {
   compact: argv.compact,
-  verbose: argv.v
+  removeComments: argv["remove-comments"],
+  verbose: argv.v,
+  compare: argv.compare
 }
 
 var css = {
   bytes: Buffer.byteLength(input),
-  variables: {}
+  variables: {},
+  comment: null
 }
 
 var lines = input.split("\n");
 
+function clean(line) {
+  if (line && !/^\s+$/.test(line))
+    return true;
+  else
+    return false;
+}
+
 _(lines)
 .map(function(line) {
   return comment.single(css, line);
+})
+.filter(clean)
+.map(function(line) {
+  if (options.removeComments)
+  	return comment.multiline(css, line);
+  else
+    return line;
 })
 .map(function(line) {
   return variable.declaration(css, line);
@@ -36,18 +55,28 @@ _(lines)
 })
 .collect()
 .toArray(function(array) {
-  if (argv.compact) {
-  	var output = compactify(array[0].join(" "));
-    
-    if (options.verbose) {
-      console.log("Input size:", chalk.green(css.bytes))
+  var output = array[0].filter(clean).join("\n");
+  var compact = compactify(array[0].join(" "));
+  
+  if (options.verbose) {
+  	console.log("Input size:", chalk.green(css.bytes))
+    if (argv.compact)
+      console.log("Output size:", chalk.magenta(Buffer.byteLength(compact)));
+  	else
       console.log("Output size:", chalk.magenta(Buffer.byteLength(output)))
-      console.log("\n");
-    }
+    console.log("\n");
+  }
     
-    console.log(output);
+  if (options.compare) {
+  	console.log(chalk.yellow("Input:"));
+    console.log(chalk.green(input));
+    console.log(chalk.yellow("Output:"));
+    console.log(chalk.cyan(output));
+  }
+ 	else if (argv.compact) {
+    console.log(compact);
   }
   else {
-    console.log(array[0].join("\n"));
+    console.log(output);
   }
 });
